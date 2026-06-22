@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fragrance Explorer</title>
+  <style>
+    :root {
+      --bg: #0f0a14;
+      --card: #1c1426;
+      --card-hover: #271a36;
+      --accent: #c084fc;
+      --accent-dim: #7c3aed;
+      --text: #ede9f0;
+      --muted: #9d92ab;
+      --border: #34273f;
+      --gold: #fbbf24;
+      --chip: #2d2138;
+      --green: #4ade80;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #150e1d, #0f0a14);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 32px 16px 80px;
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 24px; }
+    h1 {
+      font-size: 2rem;
+      background: linear-gradient(90deg, #c084fc, #f0abfc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .tagline { color: var(--muted); margin-top: 4px; font-size: 0.95rem; }
+    .layer2-cta {
+      margin-top: 12px;
+      background: rgba(124,58,237,0.18);
+      color: #d8b4fe;
+      border: 1px solid var(--accent-dim);
+      border-radius: 10px;
+      padding: 9px 18px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .layer2-cta:hover { background: rgba(124,58,237,0.4); }
+
+    .controls {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 18px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      position: sticky;
+      top: 8px;
+      z-index: 10;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+    #search {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #120d1a;
+      color: var(--text);
+      font-size: 1.05rem;
+      outline: none;
+    }
+    #search:focus { border-color: var(--accent); }
+    .filter-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    select {
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: #120d1a;
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+      cursor: pointer;
+    }
+    select:focus { border-color: var(--accent); }
+    label.lbl { color: var(--muted); font-size: 0.82rem; display: flex; align-items: center; gap: 6px; }
+    .count { color: var(--muted); font-size: 0.85rem; margin-left: auto; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 14px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      transition: transform 0.12s, border-color 0.12s, background 0.12s;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .card:hover { transform: translateY(-3px); border-color: var(--accent-dim); background: var(--card-hover); }
+    .card .name { font-size: 1.08rem; font-weight: 600; line-height: 1.2; }
+    .card .brand { color: var(--accent); font-size: 0.88rem; }
+    .meta { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.8rem; color: var(--muted); align-items: center; }
+    .rating { color: var(--gold); font-weight: 600; }
+    .gender-tag { font-size: 0.72rem; padding: 1px 8px; border-radius: 20px; background: var(--chip); color: var(--muted); text-transform: capitalize; }
+    .accords { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+    .accord { font-size: 0.72rem; padding: 3px 9px; border-radius: 20px; background: var(--chip); color: #d8b4fe; text-transform: capitalize; }
+    .notes { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+    .notes b { color: #c4b5d4; font-weight: 600; }
+    .card-actions { margin-top: auto; display: flex; gap: 14px; align-items: center; padding-top: 4px; }
+    .card-actions a { font-size: 0.78rem; color: var(--accent); text-decoration: none; }
+    .card-actions a:hover { text-decoration: underline; }
+    .layer-btn {
+      font-size: 0.78rem;
+      background: rgba(124,58,237,0.18);
+      color: #d8b4fe;
+      border: 1px solid var(--accent-dim);
+      border-radius: 8px;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .layer-btn:hover { background: rgba(124,58,237,0.4); }
+
+    .empty { text-align: center; color: var(--muted); padding: 60px 0; font-style: italic; grid-column: 1/-1; }
+    #more {
+      display: block; margin: 26px auto 0; padding: 12px 28px;
+      background: var(--accent-dim); color: white; border: none;
+      border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    }
+    #more:hover { background: var(--accent); }
+    #more[hidden] { display: none; }
+    .loading { text-align: center; color: var(--muted); padding: 60px; }
+
+    /* Modal */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(8,5,12,0.82);
+      display: none; align-items: flex-start; justify-content: center;
+      padding: 40px 16px; z-index: 100; overflow-y: auto; backdrop-filter: blur(4px);
+    }
+    .overlay.open { display: flex; }
+    .modal {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; max-width: 720px; width: 100%; padding: 24px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+    }
+    .modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 6px; }
+    .modal-head h2 { font-size: 1.3rem; }
+    .modal-head .sub { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+    .close-x { background: transparent; border: none; color: var(--muted); font-size: 1.6rem; cursor: pointer; line-height: 1; }
+    .close-x:hover { color: var(--accent); }
+    .modal-intro { color: var(--muted); font-size: 0.85rem; margin: 10px 0 16px; line-height: 1.5; }
+    .combo {
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px; margin-bottom: 10px; background: #160f1f;
+    }
+    .combo-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .combo-name { font-weight: 600; }
+    .combo-link {
+      background: none; border: none; padding: 0; cursor: pointer;
+      color: var(--text); font: inherit; font-weight: 600; text-align: left;
+    }
+    .combo-link:hover .combo-name { color: var(--accent); text-decoration: underline; }
+    .combo-link .arrow { color: var(--muted); font-size: 0.78rem; font-weight: 400; }
+    .combo-brand { color: var(--accent); font-size: 0.85rem; font-weight: 400; }
+    .strength { font-size: 0.75rem; font-weight: 700; padding: 2px 10px; border-radius: 20px; white-space: nowrap; }
+    .s-excellent { background: rgba(74,222,128,0.15); color: var(--green); }
+    .s-great { background: rgba(192,132,252,0.18); color: #d8b4fe; }
+    .s-good { background: rgba(251,191,36,0.15); color: var(--gold); }
+    .s-try { background: rgba(157,146,171,0.15); color: var(--muted); }
+    .bar { height: 5px; background: #2a1f37; border-radius: 4px; margin: 8px 0; overflow: hidden; }
+    .bar > div { height: 100%; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); }
+    .why { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+    .why b { color: #c4b5d4; }
+    .modal-empty { color: var(--muted); font-style: italic; padding: 20px 0; text-align: center; }
+
+    /* Layer-two picker */
+    .pick-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+    .pick-col { flex: 1; min-width: 220px; }
+    .pick-col label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 5px; }
+    .pick-input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+      border-radius: 9px; background: #120d1a; color: var(--text); font-size: 0.95rem; outline: none;
+    }
+    .pick-input:focus { border-color: var(--accent); }
+    .pick-results {
+      border: 1px solid var(--border); border-top: none; border-radius: 0 0 9px 9px;
+      max-height: 180px; overflow-y: auto; background: #140e1d;
+    }
+    .pick-results[hidden] { display: none; }
+    .pick-item { padding: 8px 12px; cursor: pointer; font-size: 0.85rem; }
+    .pick-item:hover, .pick-item.active { background: var(--card-hover); }
+    .pick-item .pi-brand { color: var(--accent); font-size: 0.78rem; }
+    .picked {
+      border: 1px solid var(--accent-dim); border-radius: 9px; padding: 10px 12px;
+      background: #160f1f; font-size: 0.9rem;
+    }
+    .picked .pk-brand { color: var(--accent); font-size: 0.8rem; }
+    .picked .pk-clear { float: right; cursor: pointer; color: var(--muted); }
+    .picked .pk-clear:hover { color: var(--accent); }
+    .verdict { margin-top: 6px; }
+    .verdict-big { font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
+    .verdict-tip { font-size: 0.82rem; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Fragrance Explorer</h1>
+      <p class="tagline">Browse <span id="total">0</span> perfumes from Fragrantica · search, filter, layer</p>
+      <button class="layer2-cta" id="open-layer2">🧪 Layer two scents</button>
+    </header>
+
+    <div class="controls">
+      <input id="search" type="text" placeholder="Search by perfume, brand, note, or perfumer…" autocomplete="off" />
+      <div class="filter-row">
+        <label class="lbl">Gender
+          <select id="gender">
+            <option value="">Any</option>
+            <option value="men">Men</option>
+            <option value="women">Women</option>
+            <option value="unisex">Unisex</option>
+          </select>
+        </label>
+        <label class="lbl">Accord
+          <select id="accord"><option value="">Any</option></select>
+        </label>
+        <label class="lbl">Min rating
+          <select id="minrate">
+            <option value="0">Any</option>
+            <option value="3">3.0+</option>
+            <option value="3.5">3.5+</option>
+            <option value="4">4.0+</option>
+            <option value="4.3">4.3+</option>
+          </select>
+        </label>
+        <label class="lbl">Sort
+          <select id="sort">
+            <option value="votes">Most reviewed</option>
+            <option value="rating">Highest rated</option>
+            <option value="year_desc">Newest</option>
+            <option value="year_asc">Oldest</option>
+            <option value="name">Name A–Z</option>
+          </select>
+        </label>
+        <span class="count" id="count">—</span>
+      </div>
+    </div>
+
+    <div class="grid" id="grid"><div class="loading">Loading perfumes…</div></div>
+    <button id="more" hidden>Show more</button>
+  </div>
+
+  <!-- Layering (single source) modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="m-title">Layering with …</h2>
+          <div class="sub" id="m-sub"></div>
+        </div>
+        <button class="close-x" id="m-close" title="Close">&times;</button>
+      </div>
+      <p class="modal-intro">
+        Suggested scents to layer with this one. Scores come from perfumery theory —
+        classic complementary accords, shared bridge notes, and avoiding near-duplicates.
+        Click any name to explore <i>its</i> matches. Spray the heavier/base-driven scent first.
+      </p>
+      <div id="m-list"></div>
+    </div>
+  </div>
+
+  <!-- Layer TWO specific scents modal -->
+  <div class="overlay" id="overlay2">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2>Layer two scents</h2>
+          <div class="sub">Pick any two fragrances to see how well they'd layer.</div>
+        </div>
+        <button class="close-x" id="m2-close" title="Close">&times;</button>
+      </div>
+      <div class="pick-row">
+        <div class="pick-col">
+          <label>Scent A</label>
+          <div id="slotA"></div>
+        </div>
+        <div class="pick-col">
+          <label>Scent B</label>
+          <div id="slotB"></div>
+        </div>
+      </div>
+      <div id="verdict"></div>
+    </div>
+  </div>
+
+  <script src="perfumes.js"></script>
+  <script src="layering.js"></script>
+  <script>
+    const PAGE = 60;
+    let shown = PAGE;
+    let results = [];
+
+    const $ = id => document.getElementById(id);
+    const data = window.PERFUMES || [];
+
+    data.forEach((p, i) => {
+      p._id = i;
+      p._notes = new Set([...p.top, ...p.mid, ...p.base]);
+    });
+
+    function buildAccordOptions() {
+      const counts = {};
+      data.forEach(p => p.accords.forEach(a => counts[a] = (counts[a]||0)+1));
+      const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+      const sel = $("accord");
+      sorted.forEach(a => {
+        const o = document.createElement("option");
+        o.value = a;
+        o.textContent = a.charAt(0).toUpperCase() + a.slice(1);
+        sel.appendChild(o);
+      });
+    }
+
+    function escapeHtml(s){ return (s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+    function stars(r){ return r==null ? "" : "★ " + r.toFixed(2); }
+
+    function card(p) {
+      const notes = [];
+      if (p.top.length) notes.push(`<b>Top:</b> ${escapeHtml(p.top.join(", "))}`);
+      if (p.mid.length) notes.push(`<b>Heart:</b> ${escapeHtml(p.mid.join(", "))}`);
+      if (p.base.length) notes.push(`<b>Base:</b> ${escapeHtml(p.base.join(", "))}`);
+      const accords = p.accords.slice(0,5).map(a=>`<span class="accord">${escapeHtml(a)}</span>`).join("");
+      return `<div class="card">
+        <div>
+          <div class="name">${escapeHtml(p.name)}</div>
+          <div class="brand">${escapeHtml(p.brand)}${p.year ? " · "+p.year : ""}</div>
+        </div>
+        <div class="meta">
+          ${p.rating ? `<span class="rating">${stars(p.rating)}</span>` : ""}
+          ${p.votes ? `<span>${p.votes.toLocaleString()} votes</span>` : ""}
+          ${p.gender ? `<span class="gender-tag">${escapeHtml(p.gender)}</span>` : ""}
+        </div>
+        ${accords ? `<div class="accords">${accords}</div>` : ""}
+        ${notes.length ? `<div class="notes">${notes.join("<br>")}</div>` : ""}
+        <div class="card-actions">
+          <button class="layer-btn" data-id="${p._id}">🧪 Layer</button>
+          ${p.url ? `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">Fragrantica →</a>` : ""}
+        </div>
+      </div>`;
+    }
+
+    function apply() {
+      const q = $("search").value.trim().toLowerCase();
+      const g = $("gender").value;
+      const ac = $("accord").value;
+      const mr = parseFloat($("minrate").value);
+      const sort = $("sort").value;
+
+      results = data.filter(p => {
+        if (g && p.gender !== g) return false;
+        if (ac && !p.accords.includes(ac)) return false;
+        if (mr && (p.rating == null || p.rating < mr)) return false;
+        if (q) {
+          const hay = (p.name+" "+p.brand+" "+p.top.join(" ")+" "+p.mid.join(" ")+" "+p.base.join(" ")+" "+p.perfumers.join(" ")).toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+
+      results.sort((a,b) => {
+        switch (sort) {
+          case "rating": return (b.rating||0)-(a.rating||0) || (b.votes||0)-(a.votes||0);
+          case "year_desc": return (b.year||0)-(a.year||0);
+          case "year_asc": return (a.year||9999)-(b.year||9999);
+          case "name": return a.name.localeCompare(b.name);
+          default: return (b.votes||0)-(a.votes||0);
+        }
+      });
+
+      shown = PAGE;
+      draw();
+    }
+
+    function draw() {
+      const grid = $("grid");
+      $("count").textContent = results.length.toLocaleString() + " matches";
+      if (results.length === 0) {
+        grid.innerHTML = `<div class="empty">No perfumes match your filters.</div>`;
+        $("more").hidden = true;
+        return;
+      }
+      grid.innerHTML = results.slice(0, shown).map(card).join("");
+      $("more").hidden = shown >= results.length;
+    }
+
+    // ---- Single-source layering modal ----
+    function whyText(r) {
+      const bits = [];
+      if (r.best) {
+        const known = r.bestW >= 2;
+        bits.push(`<b>${escapeHtml(r.best[0])}</b> + <b>${escapeHtml(r.best[1])}</b> ${known ? "is a classic complementary pairing" : "accords give common ground"}`);
+      }
+      if (r.shared && r.shared.length) bits.push(`shared notes bridge them: ${escapeHtml(r.shared.slice(0,3).join(", "))}`);
+      if (!bits.length) bits.push("contrasting profiles that can add depth");
+      return bits.join(" · ");
+    }
+
+    function openLayering(src) {
+      $("m-title").textContent = "Layering with " + src.name;
+      $("m-sub").textContent = src.brand + (src.year ? " · " + src.year : "") +
+        (src.accords.length ? " · " + src.accords.slice(0,3).join(", ") : "");
+      const partners = layerPartners(src, data, 8);
+      const list = $("m-list");
+      if (!partners.length) {
+        list.innerHTML = `<div class="modal-empty">No strong layering partners found for this one.</div>`;
+      } else {
+        list.innerHTML = partners.map(r => {
+          const [label, cls, pct] = layerTier(r);
+          return `<div class="combo">
+            <div class="combo-top">
+              <button class="combo-link" data-id="${r.p._id}">
+                <span class="combo-name">${escapeHtml(r.p.name)}</span>
+                <span class="combo-brand">— ${escapeHtml(r.p.brand)}</span>
+                <span class="arrow">›</span>
+              </button>
+              <span class="strength ${cls}">${label}</span>
+            </div>
+            <div class="bar"><div style="width:${pct}%"></div></div>
+            <div class="why">${whyText(r)}</div>
+          </div>`;
+        }).join("");
+      }
+      $("overlay2").classList.remove("open");
+      $("overlay").classList.add("open");
+    }
+    function closeModal(){ $("overlay").classList.remove("open"); }
+
+    // clicking a partner name drills into ITS matches
+    $("m-list").addEventListener("click", e => {
+      const b = e.target.closest(".combo-link");
+      if (b) openLayering(data[+b.dataset.id]);
+    });
+
+    // ---- Layer two specific scents ----
+    const picks = { A: null, B: null };
+
+    function slotEmpty(slot) {
+      return `<input class="pick-input" id="inp${slot}" type="text" placeholder="Search a fragrance…" autocomplete="off" />
+        <div class="pick-results" id="res${slot}" hidden></div>`;
+    }
+    function slotFilled(slot, p) {
+      return `<div class="picked">
+        <span class="pk-clear" data-slot="${slot}">&times;</span>
+        <div><b>${escapeHtml(p.name)}</b></div>
+        <div class="pk-brand">${escapeHtml(p.brand)}${p.year?" · "+p.year:""}</div>
+      </div>`;
+    }
+
+    function renderSlot(slot) {
+      const el = $("slot" + slot);
+      if (picks[slot]) { el.innerHTML = slotFilled(slot, picks[slot]); }
+      else {
+        el.innerHTML = slotEmpty(slot);
+        wireSearch(slot);
+      }
+      renderVerdict();
+    }
+
+    function wireSearch(slot) {
+      const inp = $("inp" + slot), res = $("res" + slot);
+      let dt;
+      inp.addEventListener("input", () => {
+        clearTimeout(dt);
+        dt = setTimeout(() => {
+          const q = inp.value.trim().toLowerCase();
+          if (q.length < 2) { res.hidden = true; return; }
+          const hits = [];
+          for (const p of data) {
+            if ((p.name + " " + p.brand).toLowerCase().includes(q)) {
+              hits.push(p);
+              if (hits.length >= 30) break;
+            }
+          }
+          hits.sort((a,b)=>(b.votes||0)-(a.votes||0));
+          const top = hits.slice(0, 12);
+          if (!top.length) { res.innerHTML = `<div class="pick-item">No matches</div>`; res.hidden = false; return; }
+          res.innerHTML = top.map(p =>
+            `<div class="pick-item" data-id="${p._id}"><b>${escapeHtml(p.name)}</b> <span class="pi-brand">${escapeHtml(p.brand)}</span></div>`
+          ).join("");
+          res.hidden = false;
+        }, 150);
+      });
+      res.addEventListener("click", e => {
+        const it = e.target.closest(".pick-item");
+        if (it && it.dataset.id) { picks[slot] = data[+it.dataset.id]; renderSlot(slot); }
+      });
+    }
+
+    function verdictLabel(r) {
+      const [label, cls] = layerTier(r);
+      return { label, cls };
+    }
+
+    function renderVerdict() {
+      const v = $("verdict");
+      if (!picks.A || !picks.B) {
+        v.innerHTML = `<div class="verdict-tip">Pick a fragrance on each side to get a compatibility verdict.</div>`;
+        return;
+      }
+      if (picks.A._id === picks.B._id) {
+        v.innerHTML = `<div class="verdict-tip">That's the same fragrance on both sides — pick two different ones.</div>`;
+        return;
+      }
+      // score both directions, take the better signal
+      const r1 = layerScore(picks.A, picks.B);
+      const r2 = layerScore(picks.B, picks.A);
+      const r = (r2.bestW > r1.bestW || (r2.bestW===r1.bestW && r2.score>r1.score)) ? r2 : r1;
+      const { label, cls } = verdictLabel(r);
+      const [, , pct] = layerTier(r);
+
+      // which to spray first: the one with more base-heavy / blender accords
+      const baseScore = p => p.accords.filter(a => ["amber","woody","vanilla","oud","leather","tobacco","musky"].includes(a)).length;
+      const first = baseScore(picks.A) >= baseScore(picks.B) ? picks.A : picks.B;
+      const second = first === picks.A ? picks.B : picks.A;
+
+      v.innerHTML = `<div class="combo verdict">
+        <div class="verdict-big">${label}</div>
+        <div class="bar"><div style="width:${pct}%"></div></div>
+        <div class="why">${whyText(r)}</div>
+        <div class="verdict-tip">
+          Application tip: spray <b>${escapeHtml(first.name)}</b> first (it's the heavier base),
+          then <b>${escapeHtml(second.name)}</b> on top. Go light on the second — 1–2 sprays — and test on skin before committing.
+        </div>
+      </div>`;
+    }
+
+    function openLayer2() {
+      renderSlot("A"); renderSlot("B");
+      $("overlay").classList.remove("open");
+      $("overlay2").classList.add("open");
+    }
+    function closeModal2(){ $("overlay2").classList.remove("open"); }
+
+    $("verdict").addEventListener("click", () => {});
+    $("overlay2").addEventListener("click", e => {
+      const clr = e.target.closest(".pk-clear");
+      if (clr) { picks[clr.dataset.slot] = null; renderSlot(clr.dataset.slot); return; }
+      if (e.target === $("overlay2")) closeModal2();
+    });
+
+    // ---- wiring ----
+    $("grid").addEventListener("click", e => {
+      const btn = e.target.closest(".layer-btn");
+      if (btn) openLayering(data[+btn.dataset.id]);
+    });
+    $("m-close").addEventListener("click", closeModal);
+    $("overlay").addEventListener("click", e => { if (e.target === $("overlay")) closeModal(); });
+    $("open-layer2").addEventListener("click", openLayer2);
+    $("m2-close").addEventListener("click", closeModal2);
+    document.addEventListener("keydown", e => { if (e.key === "Escape") { closeModal(); closeModal2(); } });
+
+    let t;
+    $("search").addEventListener("input", () => { clearTimeout(t); t = setTimeout(apply, 180); });
+    ["gender","accord","minrate","sort"].forEach(id => $(id).addEventListener("change", apply));
+    $("more").addEventListener("click", () => { shown += PAGE; draw(); });
+
+    if (data.length === 0) {
+      $("grid").innerHTML = `<div class="empty">Could not load perfume data (perfumes.js missing).</div>`;
+    } else {
+      $("total").textContent = data.length.toLocaleString();
+      buildAccordOptions();
+      apply();
+    }
+  </script>
+</body>
+</html>
