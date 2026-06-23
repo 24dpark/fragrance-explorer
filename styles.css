@@ -142,6 +142,37 @@ label.lbl { color: var(--muted); font-size: 0.82rem; display: flex; align-items:
   border-color: var(--accent);
   background: var(--surface-2);
 }
+/* Card image (real photo over a generated placeholder) */
+.card-img {
+  position: relative;
+  height: 170px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--surface-2), var(--surface-3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+.card-img img {
+  position: relative;
+  z-index: 1;
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+.img-ph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 3.4rem;
+  font-weight: 500;
+  color: rgba(217, 138, 124, 0.4);
+  z-index: 0;
+}
 .card .name {
   font-family: "Cormorant Garamond", Georgia, serif;
   font-size: 1.5rem;
@@ -276,6 +307,26 @@ label.lbl { color: var(--muted); font-size: 0.82rem; display: flex; align-items:
 .detail-brand { color: var(--accent); font-size: 1.05rem; letter-spacing: 0.01em; margin-bottom: 14px; }
 .detail-meta { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; font-size: 0.9rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .detail-meta .rating { color: var(--gold); font-weight: 600; }
+
+/* Detail header: photo beside the title info, stacks on mobile */
+.detail-top { display: grid; grid-template-columns: 260px 1fr; gap: 32px; align-items: start; }
+.detail-img {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--surface-2), var(--surface-3));
+  border: 1px solid var(--border);
+  aspect-ratio: 3 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.detail-img img { position: relative; z-index: 1; max-width: 100%; max-height: 100%; object-fit: contain; }
+.detail-img .img-ph { font-size: 5rem; }
+@media (max-width: 640px) {
+  .detail-top { grid-template-columns: 1fr; gap: 22px; }
+  .detail-img { max-width: 220px; }
+}
 
 .section { margin-bottom: 36px; }
 .section-title {

@@ -27,6 +27,20 @@
     function escapeHtml(s){ return (s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
     function stars(r){ return r==null ? "" : "\u2605 " + r.toFixed(2); }
 
+    // Real Fragrantica photo with a generated fallback (matches search.js).
+    function fragImageUrl(p) {
+      if (!p || !p.url) return null;
+      const m = p.url.match(/-(\d+)\.html?$/);
+      return m ? "https://fimgs.net/mdimg/perfume/375x500." + m[1] + ".jpg" : null;
+    }
+    function fragImageHtml(p, cls) {
+      const url = fragImageUrl(p);
+      const initial = (p.name || "?").trim()[0].toUpperCase();
+      const ph = `<span class="img-ph">${escapeHtml(initial)}</span>`;
+      const img = url ? `<img src="${url}" alt="${escapeHtml(p.name)} bottle" onerror="this.style.display='none'">` : "";
+      return `<div class="${cls}">${ph}${img}</div>`;
+    }
+
     const id = parseInt(new URLSearchParams(location.search).get("id"), 10);
     const p = (!isNaN(id) && data[id]) ? data[id] : null;
 
@@ -104,14 +118,19 @@
         <a class="back-link" href="index.html">&larr; Back to explorer</a>
 
         <div class="detail-head">
-          <h1>${escapeHtml(p.name)}</h1>
-          <div class="detail-brand">${escapeHtml(p.brand)}</div>
-          <div class="detail-meta">
-            ${p.rating ? `<span class="rating">${stars(p.rating)}</span>` : ""}
-            ${p.votes ? `<span>${p.votes.toLocaleString()} votes</span>` : ""}
-            ${p.year ? `<span>Released ${p.year}</span>` : ""}
-            ${p.gender ? `<span class="gender-tag">${escapeHtml(p.gender)}</span>` : ""}
-            ${p.country ? `<span>${escapeHtml(p.country)}</span>` : ""}
+          <div class="detail-top">
+            ${fragImageHtml(p, "detail-img")}
+            <div>
+              <h1>${escapeHtml(p.name)}</h1>
+              <div class="detail-brand">${escapeHtml(p.brand)}</div>
+              <div class="detail-meta">
+                ${p.rating ? `<span class="rating">${stars(p.rating)}</span>` : ""}
+                ${p.votes ? `<span>${p.votes.toLocaleString()} votes</span>` : ""}
+                ${p.year ? `<span>Released ${p.year}</span>` : ""}
+                ${p.gender ? `<span class="gender-tag">${escapeHtml(p.gender)}</span>` : ""}
+                ${p.country ? `<span>${escapeHtml(p.country)}</span>` : ""}
+              </div>
+            </div>
           </div>
         </div>
 

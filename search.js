@@ -77,7 +77,33 @@ function relevance(p, tokens, rawQuery) {
   return score;
 }
 
-// Attach precomputed normalized fields to every perfume once at load.
+// Derive the Fragrantica CDN image URL from a perfume's page URL.
+// Their pages end in "-<id>.html" and the image CDN serves that id as
+// https://fimgs.net/mdimg/perfume/375x500.<id>.jpg . Returns null if the
+// id can't be parsed, so the caller can show a placeholder instead.
+function fragImageUrl(p) {
+  if (!p || !p.url) return null;
+  const m = p.url.match(/-(\d+)\.html?$/);
+  return m ? "https://fimgs.net/mdimg/perfume/375x500." + m[1] + ".jpg" : null;
+}
+
+// First letter of the name, used for the generated fallback tile.
+function fragInitial(p) {
+  const s = (p && p.name ? p.name : "").trim();
+  return s ? s[0].toUpperCase() : "?";
+}
+
+// Build the markup for a fragrance image with a placeholder behind it.
+// The <img> sits on top; if it fails to load we hide it and the
+// placeholder (the serif initial) shows through. No broken-image icons.
+function fragImageHtml(p, cls) {
+  const url = fragImageUrl(p);
+  const ph = `<span class="img-ph">${fragInitial(p)}</span>`;
+  const img = url
+    ? `<img src="${url}" alt="${(p.name||"").replace(/"/g,"&quot;")} bottle" loading="lazy" onerror="this.style.display='none'">`
+    : "";
+  return `<div class="${cls}">${ph}${img}</div>`;
+}
 function indexForSearch(data) {
   for (const p of data) {
     p._nameNorm = normalize(p.name);

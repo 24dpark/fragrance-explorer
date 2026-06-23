@@ -144,6 +144,7 @@
       const accords = p.accords.slice(0,5).map(a=>`<span class="accord">${escapeHtml(a)}</span>`).join("");
       const href = "detail.html?id=" + p._id;
       return `<div class="card" data-href="${href}">
+        ${fragImageHtml(p, "card-img")}
         <div>
           <a class="name" href="${href}">${escapeHtml(p.name)}</a>
           <div class="brand">${escapeHtml(p.brand)}${p.year ? " \u00b7 "+p.year : ""}</div>
