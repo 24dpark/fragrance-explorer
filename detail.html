@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fragrance Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="wrap" id="root">
+    <div class="loading">Loading</div>
+  </div>
+
+  <script src="perfumes.js"></script>
+  <script src="layering.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+    const data = window.PERFUMES || [];
+    data.forEach((p, i) => {
+      p._id = i;
+      p._notes = new Set([...p.top, ...p.mid, ...p.base]);
+    });
+
+    function escapeHtml(s){ return (s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+    function stars(r){ return r==null ? "" : "\u2605 " + r.toFixed(2); }
+
+    const id = parseInt(new URLSearchParams(location.search).get("id"), 10);
+    const p = (!isNaN(id) && data[id]) ? data[id] : null;
+
+    function whyText(r) {
+      const bits = [];
+      if (r.best) {
+        const known = r.bestW >= 2;
+        bits.push(`<b>${escapeHtml(r.best[0])}</b> + <b>${escapeHtml(r.best[1])}</b> ${known ? "is a classic complementary pairing" : "accords give common ground"}`);
+      }
+      if (r.shared && r.shared.length) bits.push(`shared notes bridge them: ${escapeHtml(r.shared.slice(0,3).join(", "))}`);
+      if (!bits.length) bits.push("contrasting profiles that can add depth");
+      return bits.join(" \u00b7 ");
+    }
+
+    function pyramidLevel(label, notes) {
+      if (!notes || !notes.length) return "";
+      const chips = notes.map(n => `<span class="note-chip">${escapeHtml(n)}</span>`).join("");
+      return `<div class="pyramid-level">
+        <div class="level-label">${label}</div>
+        <div class="note-chips">${chips}</div>
+      </div>`;
+    }
+
+    function render() {
+      const root = $("root");
+      if (!p) {
+        root.innerHTML = `<div class="notfound">
+          <h1>Fragrance not found</h1>
+          <p>We couldn't find that perfume. It may have been removed or the link is incorrect.</p>
+          <p style="margin-top:22px"><a class="btn-primary" href="index.html">&larr; Back to explorer</a></p>
+        </div>`;
+        return;
+      }
+
+      document.title = p.name + " by " + p.brand + " - Fragrance Explorer";
+
+      const accords = p.accords.length
+        ? `<div class="accords detail-accords">${p.accords.map(a=>`<span class="accord">${escapeHtml(a)}</span>`).join("")}</div>`
+        : `<p class="why">No accord data for this fragrance.</p>`;
+
+      const perfumers = (p.perfumers && p.perfumers.length)
+        ? `<div class="perfumers">${p.perfumers.map(n=>`<span class="perfumer-chip">${escapeHtml(n)}</span>`).join("")}</div>`
+        : `<p class="why">Perfumer not listed.</p>`;
+
+      const hasNotes = p.top.length || p.mid.length || p.base.length;
+      const pyramid = hasNotes
+        ? `<div class="pyramid">
+             ${pyramidLevel("Top", p.top)}
+             ${pyramidLevel("Heart", p.mid)}
+             ${pyramidLevel("Base", p.base)}
+           </div>`
+        : `<p class="why">No note breakdown available for this fragrance.</p>`;
+
+      // layering suggestions reuse the shared engine
+      const partners = layerPartners(p, data, 6);
+      const layering = partners.length
+        ? partners.map(r => {
+            const [label, cls, pct] = layerTier(r);
+            return `<div class="combo">
+              <div class="combo-top">
+                <a class="combo-link" href="detail.html?id=${r.p._id}">
+                  <span class="combo-name">${escapeHtml(r.p.name)}</span>
+                  <span class="combo-brand">${escapeHtml(r.p.brand)}</span>
+                  <span class="arrow">&rsaquo;</span>
+                </a>
+                <span class="strength ${cls}">${label}</span>
+              </div>
+              <div class="bar"><div style="width:${pct}%"></div></div>
+              <div class="why">${whyText(r)}</div>
+            </div>`;
+          }).join("")
+        : `<div class="modal-empty">No strong layering partners found for this one.</div>`;
+
+      root.innerHTML = `
+        <a class="back-link" href="index.html">&larr; Back to explorer</a>
+
+        <div class="detail-head">
+          <h1>${escapeHtml(p.name)}</h1>
+          <div class="detail-brand">${escapeHtml(p.brand)}</div>
+          <div class="detail-meta">
+            ${p.rating ? `<span class="rating">${stars(p.rating)}</span>` : ""}
+            ${p.votes ? `<span>${p.votes.toLocaleString()} votes</span>` : ""}
+            ${p.year ? `<span>Released ${p.year}</span>` : ""}
+            ${p.gender ? `<span class="gender-tag">${escapeHtml(p.gender)}</span>` : ""}
+            ${p.country ? `<span>${escapeHtml(p.country)}</span>` : ""}
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Main accords</div>
+          ${accords}
+        </div>
+
+        <div class="section">
+          <div class="section-title">Scent pyramid</div>
+          ${pyramid}
+        </div>
+
+        <div class="section">
+          <div class="section-title">Perfumer</div>
+          ${perfumers}
+        </div>
+
+        <div class="section">
+          <div class="detail-actions">
+            <button class="btn-primary" id="layer-this">Find scents to layer</button>
+            ${p.url ? `<a class="btn-ghost" href="${escapeHtml(p.url)}" target="_blank" rel="noopener">View on Fragrantica &rarr;</a>` : ""}
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Layers well with</div>
+          ${layering}
+        </div>
+      `;
+
+      const btn = $("layer-this");
+      if (btn) btn.addEventListener("click", () => {
+        document.querySelector(".section-title:last-of-type") &&
+          document.querySelectorAll(".section-title")[document.querySelectorAll(".section-title").length-1]
+            .scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+
+    if (data.length === 0) {
+      $("root").innerHTML = `<div class="notfound"><h1>Data failed to load</h1><p>perfumes.js is missing.</p></div>`;
+    } else {
+      render();
+    }
+  </script>
+</body>
+</html>
