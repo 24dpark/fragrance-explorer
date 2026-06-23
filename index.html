@@ -4,222 +4,287 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fragrance Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
+    /* ============================================================
+       Fragrance Explorer - editorial-luxury dark theme
+       Palette: warm charcoal base + single clay-rose accent.
+       Display: Cormorant Garamond (serif, justified for a fragrance
+       domain). UI: Outfit. One accent locked across the whole page.
+       Radius rule: containers 14px, buttons 10px, tags pill.
+       ============================================================ */
     :root {
-      --bg: #0f0a14;
-      --card: #1c1426;
-      --card-hover: #271a36;
-      --accent: #c084fc;
-      --accent-dim: #7c3aed;
-      --text: #ede9f0;
-      --muted: #9d92ab;
-      --border: #34273f;
-      --gold: #fbbf24;
-      --chip: #2d2138;
-      --green: #4ade80;
+      --bg: #16130f;          /* warm near-black */
+      --bg-2: #1c1813;        /* gradient end */
+      --surface: #211c16;     /* cards, controls */
+      --surface-2: #2a241d;   /* hover */
+      --surface-3: #181410;   /* inset inputs */
+      --text: #f3ede3;        /* warm off-white */
+      --muted: #a99e8d;       /* warm grey */
+      --soft: #d8cdba;        /* note emphasis */
+      --border: #372f26;
+      --accent: #d98a7c;      /* clay rose */
+      --accent-deep: #c2705f; /* deeper rose for fills */
+      --ink-on-accent: #1a140f;
+      --gold: #d8b673;        /* rating star, used only for ratings */
+      --green: #9bbf8a;       /* positive verdict, muted sage */
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
     body {
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-      background: linear-gradient(180deg, #150e1d, #0f0a14);
+      font-family: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: radial-gradient(1200px 600px at 50% -10%, var(--bg-2), var(--bg));
+      background-attachment: fixed;
       color: var(--text);
       min-height: 100vh;
-      padding: 32px 16px 80px;
+      padding: 40px 20px 96px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
     }
-    .wrap { max-width: 1100px; margin: 0 auto; }
-    header { text-align: center; margin-bottom: 24px; }
+    .wrap { max-width: 1120px; margin: 0 auto; }
+
+    /* ---- Header ---- */
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+      padding-bottom: 28px;
+      margin-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+    .brandblock { display: flex; flex-direction: column; gap: 6px; }
     h1 {
-      font-size: 2rem;
-      background: linear-gradient(90deg, #c084fc, #f0abfc);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-weight: 500;
+      font-size: clamp(2.4rem, 5vw, 3.4rem);
+      letter-spacing: 0.005em;
+      line-height: 1.0;
+      color: var(--text);
     }
-    .tagline { color: var(--muted); margin-top: 4px; font-size: 0.95rem; }
+    .tagline { color: var(--muted); font-size: 0.95rem; max-width: 52ch; }
+    .tagline #total { color: var(--accent); font-weight: 500; }
     .layer2-cta {
-      margin-top: 12px;
-      background: rgba(124,58,237,0.18);
-      color: #d8b4fe;
-      border: 1px solid var(--accent-dim);
+      flex-shrink: 0;
+      background: var(--accent);
+      color: var(--ink-on-accent);
+      border: none;
       border-radius: 10px;
-      padding: 9px 18px;
-      font-size: 0.9rem;
+      padding: 12px 22px;
+      font-family: inherit;
+      font-size: 0.92rem;
       font-weight: 600;
       cursor: pointer;
+      transition: transform 0.12s ease, background 0.12s ease;
     }
-    .layer2-cta:hover { background: rgba(124,58,237,0.4); }
+    .layer2-cta:hover { background: #e59c8e; }
+    .layer2-cta:active { transform: translateY(1px); }
 
+    /* ---- Controls ---- */
     .controls {
-      background: var(--card);
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 18px;
-      margin-bottom: 18px;
+      margin-bottom: 22px;
       display: grid;
       grid-template-columns: 1fr;
-      gap: 12px;
+      gap: 14px;
       position: sticky;
-      top: 8px;
+      top: 12px;
       z-index: 10;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      box-shadow: 0 12px 40px rgba(10, 7, 4, 0.45);
     }
     #search {
       width: 100%;
-      padding: 13px 16px;
+      padding: 14px 16px;
       border: 1px solid var(--border);
       border-radius: 10px;
-      background: #120d1a;
+      background: var(--surface-3);
       color: var(--text);
-      font-size: 1.05rem;
+      font-family: inherit;
+      font-size: 1.02rem;
       outline: none;
+      transition: border-color 0.12s ease;
     }
+    #search::placeholder { color: var(--muted); }
     #search:focus { border-color: var(--accent); }
-    .filter-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .filter-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
     select {
-      padding: 9px 12px;
+      padding: 10px 13px;
       border: 1px solid var(--border);
-      border-radius: 9px;
-      background: #120d1a;
+      border-radius: 10px;
+      background: var(--surface-3);
       color: var(--text);
+      font-family: inherit;
       font-size: 0.9rem;
       outline: none;
       cursor: pointer;
+      transition: border-color 0.12s ease;
     }
     select:focus { border-color: var(--accent); }
-    label.lbl { color: var(--muted); font-size: 0.82rem; display: flex; align-items: center; gap: 6px; }
-    .count { color: var(--muted); font-size: 0.85rem; margin-left: auto; }
+    label.lbl { color: var(--muted); font-size: 0.82rem; display: flex; align-items: center; gap: 7px; }
+    .count { color: var(--muted); font-size: 0.85rem; margin-left: auto; font-variant-numeric: tabular-nums; }
 
+    /* ---- Card grid ---- */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
     }
     .card {
-      background: var(--card);
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 16px;
-      transition: transform 0.12s, border-color 0.12s, background 0.12s;
+      padding: 18px;
+      transition: transform 0.14s ease, border-color 0.14s ease, background 0.14s ease;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 9px;
     }
-    .card:hover { transform: translateY(-3px); border-color: var(--accent-dim); background: var(--card-hover); }
-    .card .name { font-size: 1.08rem; font-weight: 600; line-height: 1.2; }
-    .card .brand { color: var(--accent); font-size: 0.88rem; }
-    .meta { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.8rem; color: var(--muted); align-items: center; }
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      background: var(--surface-2);
+    }
+    .card .name { font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.5rem; font-weight: 600; line-height: 1.1; }
+    .card .brand { color: var(--accent); font-size: 0.86rem; letter-spacing: 0.01em; }
+    .meta { display: flex; gap: 12px; flex-wrap: wrap; font-size: 0.8rem; color: var(--muted); align-items: center; font-variant-numeric: tabular-nums; }
     .rating { color: var(--gold); font-weight: 600; }
-    .gender-tag { font-size: 0.72rem; padding: 1px 8px; border-radius: 20px; background: var(--chip); color: var(--muted); text-transform: capitalize; }
-    .accords { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-    .accord { font-size: 0.72rem; padding: 3px 9px; border-radius: 20px; background: var(--chip); color: #d8b4fe; text-transform: capitalize; }
-    .notes { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
-    .notes b { color: #c4b5d4; font-weight: 600; }
-    .card-actions { margin-top: auto; display: flex; gap: 14px; align-items: center; padding-top: 4px; }
-    .card-actions a { font-size: 0.78rem; color: var(--accent); text-decoration: none; }
+    .gender-tag { font-size: 0.72rem; padding: 2px 9px; border-radius: 999px; background: var(--surface-3); border: 1px solid var(--border); color: var(--muted); text-transform: capitalize; }
+    .accords { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+    .accord { font-size: 0.72rem; padding: 3px 10px; border-radius: 999px; background: rgba(217, 138, 124, 0.12); border: 1px solid rgba(217, 138, 124, 0.22); color: var(--accent); text-transform: capitalize; }
+    .notes { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+    .notes b { color: #d8cdba; font-weight: 600; }
+    .card-actions { margin-top: auto; display: flex; gap: 16px; align-items: center; padding-top: 6px; }
+    .card-actions a { font-size: 0.8rem; color: var(--accent); text-decoration: none; }
     .card-actions a:hover { text-decoration: underline; }
     .layer-btn {
-      font-size: 0.78rem;
-      background: rgba(124,58,237,0.18);
-      color: #d8b4fe;
-      border: 1px solid var(--accent-dim);
-      border-radius: 8px;
-      padding: 5px 10px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 13px;
       cursor: pointer;
-      transition: background 0.12s;
+      transition: border-color 0.12s ease, background 0.12s ease;
     }
-    .layer-btn:hover { background: rgba(124,58,237,0.4); }
+    .layer-btn:hover { border-color: var(--accent); background: rgba(217, 138, 124, 0.1); }
 
-    .empty { text-align: center; color: var(--muted); padding: 60px 0; font-style: italic; grid-column: 1/-1; }
+    .empty { text-align: center; color: var(--muted); padding: 72px 0; font-style: italic; grid-column: 1/-1; }
     #more {
-      display: block; margin: 26px auto 0; padding: 12px 28px;
-      background: var(--accent-dim); color: white; border: none;
-      border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      display: block; margin: 30px auto 0; padding: 13px 30px;
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px; font-family: inherit; font-size: 0.95rem; font-weight: 500; cursor: pointer;
+      transition: border-color 0.12s ease, background 0.12s ease;
     }
-    #more:hover { background: var(--accent); }
+    #more:hover { border-color: var(--accent); background: rgba(217, 138, 124, 0.1); }
     #more[hidden] { display: none; }
-    .loading { text-align: center; color: var(--muted); padding: 60px; }
+    .loading { text-align: center; color: var(--muted); padding: 72px; grid-column: 1/-1; }
 
-    /* Modal */
+    /* ---- Modal ---- */
     .overlay {
-      position: fixed; inset: 0; background: rgba(8,5,12,0.82);
+      position: fixed; inset: 0; background: rgba(10, 7, 4, 0.78);
       display: none; align-items: flex-start; justify-content: center;
-      padding: 40px 16px; z-index: 100; overflow-y: auto; backdrop-filter: blur(4px);
+      padding: 48px 18px; z-index: 100; overflow-y: auto; backdrop-filter: blur(5px);
     }
     .overlay.open { display: flex; }
     .modal {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; max-width: 720px; width: 100%; padding: 24px;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; max-width: 720px; width: 100%; padding: 28px;
+      box-shadow: 0 40px 100px rgba(8, 5, 3, 0.7);
     }
-    .modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 6px; }
-    .modal-head h2 { font-size: 1.3rem; }
-    .modal-head .sub { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
-    .close-x { background: transparent; border: none; color: var(--muted); font-size: 1.6rem; cursor: pointer; line-height: 1; }
+    .modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 4px; }
+    .modal-head h2 { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; font-size: 1.9rem; line-height: 1.1; }
+    .modal-head .sub { color: var(--muted); font-size: 0.86rem; margin-top: 6px; }
+    .close-x { background: transparent; border: none; color: var(--muted); font-size: 1.7rem; cursor: pointer; line-height: 1; padding: 0 4px; }
     .close-x:hover { color: var(--accent); }
-    .modal-intro { color: var(--muted); font-size: 0.85rem; margin: 10px 0 16px; line-height: 1.5; }
+    .modal-intro { color: var(--muted); font-size: 0.86rem; margin: 14px 0 18px; line-height: 1.6; }
     .combo {
       border: 1px solid var(--border); border-radius: 12px;
-      padding: 14px; margin-bottom: 10px; background: #160f1f;
+      padding: 16px; margin-bottom: 12px; background: var(--surface-3);
     }
-    .combo-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-    .combo-name { font-weight: 600; }
+    .combo-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+    .combo-name { font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.25rem; font-weight: 600; }
     .combo-link {
       background: none; border: none; padding: 0; cursor: pointer;
-      color: var(--text); font: inherit; font-weight: 600; text-align: left;
+      color: var(--text); font: inherit; text-align: left;
+      display: inline-flex; align-items: baseline; gap: 8px;
     }
     .combo-link:hover .combo-name { color: var(--accent); text-decoration: underline; }
-    .combo-link .arrow { color: var(--muted); font-size: 0.78rem; font-weight: 400; }
-    .combo-brand { color: var(--accent); font-size: 0.85rem; font-weight: 400; }
-    .strength { font-size: 0.75rem; font-weight: 700; padding: 2px 10px; border-radius: 20px; white-space: nowrap; }
-    .s-excellent { background: rgba(74,222,128,0.15); color: var(--green); }
-    .s-great { background: rgba(192,132,252,0.18); color: #d8b4fe; }
-    .s-good { background: rgba(251,191,36,0.15); color: var(--gold); }
-    .s-try { background: rgba(157,146,171,0.15); color: var(--muted); }
-    .bar { height: 5px; background: #2a1f37; border-radius: 4px; margin: 8px 0; overflow: hidden; }
-    .bar > div { height: 100%; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); }
-    .why { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
-    .why b { color: #c4b5d4; }
-    .modal-empty { color: var(--muted); font-style: italic; padding: 20px 0; text-align: center; }
+    .combo-link .arrow { color: var(--muted); font-size: 0.82rem; }
+    .combo-brand { color: var(--accent); font-size: 0.86rem; font-weight: 400; }
+    .strength { font-size: 0.74rem; font-weight: 700; padding: 3px 11px; border-radius: 999px; white-space: nowrap; letter-spacing: 0.02em; }
+    .s-excellent { background: rgba(155, 191, 138, 0.16); color: var(--green); }
+    .s-great { background: rgba(217, 138, 124, 0.18); color: var(--accent); }
+    .s-good { background: rgba(216, 182, 115, 0.16); color: var(--gold); }
+    .s-try { background: rgba(169, 158, 141, 0.16); color: var(--muted); }
+    .bar { height: 5px; background: var(--surface-2); border-radius: 999px; margin: 10px 0; overflow: hidden; }
+    .bar > div { height: 100%; background: var(--accent); border-radius: 999px; }
+    .why { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+    .why b { color: #d8cdba; font-weight: 600; }
+    .modal-empty { color: var(--muted); font-style: italic; padding: 24px 0; text-align: center; }
 
-    /* Layer-two picker */
-    .pick-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+    /* ---- Layer-two picker ---- */
+    .pick-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
     .pick-col { flex: 1; min-width: 220px; }
-    .pick-col label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 5px; }
+    .pick-col label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 7px; }
     .pick-input {
-      width: 100%; padding: 10px 12px; border: 1px solid var(--border);
-      border-radius: 9px; background: #120d1a; color: var(--text); font-size: 0.95rem; outline: none;
+      width: 100%; padding: 11px 13px; border: 1px solid var(--border);
+      border-radius: 10px; background: var(--surface-3); color: var(--text); font-family: inherit; font-size: 0.95rem; outline: none;
+      transition: border-color 0.12s ease;
     }
+    .pick-input::placeholder { color: var(--muted); }
     .pick-input:focus { border-color: var(--accent); }
     .pick-results {
-      border: 1px solid var(--border); border-top: none; border-radius: 0 0 9px 9px;
-      max-height: 180px; overflow-y: auto; background: #140e1d;
+      border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px;
+      max-height: 180px; overflow-y: auto; background: var(--surface-3);
     }
     .pick-results[hidden] { display: none; }
-    .pick-item { padding: 8px 12px; cursor: pointer; font-size: 0.85rem; }
-    .pick-item:hover, .pick-item.active { background: var(--card-hover); }
+    .pick-item { padding: 9px 13px; cursor: pointer; font-size: 0.85rem; }
+    .pick-item:hover, .pick-item.active { background: var(--surface-2); }
     .pick-item .pi-brand { color: var(--accent); font-size: 0.78rem; }
     .picked {
-      border: 1px solid var(--accent-dim); border-radius: 9px; padding: 10px 12px;
-      background: #160f1f; font-size: 0.9rem;
+      border: 1px solid var(--accent); border-radius: 10px; padding: 12px 13px;
+      background: rgba(217, 138, 124, 0.08); font-size: 0.9rem;
     }
     .picked .pk-brand { color: var(--accent); font-size: 0.8rem; }
-    .picked .pk-clear { float: right; cursor: pointer; color: var(--muted); }
+    .picked .pk-clear { float: right; cursor: pointer; color: var(--muted); font-size: 1.1rem; line-height: 1; }
     .picked .pk-clear:hover { color: var(--accent); }
-    .verdict { margin-top: 6px; }
-    .verdict-big { font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
-    .verdict-tip { font-size: 0.82rem; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+    .verdict { margin-top: 8px; }
+    .verdict-big { font-family: "Cormorant Garamond", Georgia, serif; font-size: 2rem; font-weight: 600; margin-bottom: 6px; }
+    .verdict-tip { font-size: 0.84rem; color: var(--muted); margin-top: 12px; line-height: 1.6; }
+
+    /* ---- Reduced motion ---- */
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
+    }
+
+    @media (max-width: 560px) {
+      body { padding: 28px 14px 72px; }
+      header { align-items: stretch; }
+      .layer2-cta { width: 100%; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <h1>Fragrance Explorer</h1>
-      <p class="tagline">Browse <span id="total">0</span> perfumes from Fragrantica · search, filter, layer</p>
-      <button class="layer2-cta" id="open-layer2">🧪 Layer two scents</button>
+      <div class="brandblock">
+        <h1>Fragrance Explorer</h1>
+        <p class="tagline">Browse <span id="total">0</span> perfumes from Fragrantica. Search, filter, and find scents that layer well together.</p>
+      </div>
+      <button class="layer2-cta" id="open-layer2">Layer two scents</button>
     </header>
 
     <div class="controls">
-      <input id="search" type="text" placeholder="Search by perfume, brand, note, or perfumer…" autocomplete="off" />
+      <input id="search" type="text" placeholder="Search by perfume, brand, note, or perfumer" autocomplete="off" />
       <div class="filter-row">
         <label class="lbl">Gender
           <select id="gender">
@@ -247,14 +312,14 @@
             <option value="rating">Highest rated</option>
             <option value="year_desc">Newest</option>
             <option value="year_asc">Oldest</option>
-            <option value="name">Name A–Z</option>
+            <option value="name">Name A-Z</option>
           </select>
         </label>
-        <span class="count" id="count">—</span>
+        <span class="count" id="count">0</span>
       </div>
     </div>
 
-    <div class="grid" id="grid"><div class="loading">Loading perfumes…</div></div>
+    <div class="grid" id="grid"><div class="loading">Loading perfumes</div></div>
     <button id="more" hidden>Show more</button>
   </div>
 
@@ -263,15 +328,15 @@
     <div class="modal">
       <div class="modal-head">
         <div>
-          <h2 id="m-title">Layering with …</h2>
+          <h2 id="m-title">Layering with</h2>
           <div class="sub" id="m-sub"></div>
         </div>
         <button class="close-x" id="m-close" title="Close">&times;</button>
       </div>
       <p class="modal-intro">
-        Suggested scents to layer with this one. Scores come from perfumery theory —
+        Suggested scents to layer with this one. Scores come from perfumery theory:
         classic complementary accords, shared bridge notes, and avoiding near-duplicates.
-        Click any name to explore <i>its</i> matches. Spray the heavier/base-driven scent first.
+        Click any name to explore its matches. Spray the heavier, base-driven scent first.
       </p>
       <div id="m-list"></div>
     </div>
@@ -330,7 +395,7 @@
     }
 
     function escapeHtml(s){ return (s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
-    function stars(r){ return r==null ? "" : "★ " + r.toFixed(2); }
+    function stars(r){ return r==null ? "" : "\u2605 " + r.toFixed(2); }
 
     function card(p) {
       const notes = [];
@@ -341,7 +406,7 @@
       return `<div class="card">
         <div>
           <div class="name">${escapeHtml(p.name)}</div>
-          <div class="brand">${escapeHtml(p.brand)}${p.year ? " · "+p.year : ""}</div>
+          <div class="brand">${escapeHtml(p.brand)}${p.year ? " \u00b7 "+p.year : ""}</div>
         </div>
         <div class="meta">
           ${p.rating ? `<span class="rating">${stars(p.rating)}</span>` : ""}
@@ -351,8 +416,8 @@
         ${accords ? `<div class="accords">${accords}</div>` : ""}
         ${notes.length ? `<div class="notes">${notes.join("<br>")}</div>` : ""}
         <div class="card-actions">
-          <button class="layer-btn" data-id="${p._id}">🧪 Layer</button>
-          ${p.url ? `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">Fragrantica →</a>` : ""}
+          <button class="layer-btn" data-id="${p._id}">Layer</button>
+          ${p.url ? `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">Fragrantica &rarr;</a>` : ""}
         </div>
       </div>`;
     }
@@ -410,13 +475,13 @@
       }
       if (r.shared && r.shared.length) bits.push(`shared notes bridge them: ${escapeHtml(r.shared.slice(0,3).join(", "))}`);
       if (!bits.length) bits.push("contrasting profiles that can add depth");
-      return bits.join(" · ");
+      return bits.join(" \u00b7 ");
     }
 
     function openLayering(src) {
       $("m-title").textContent = "Layering with " + src.name;
-      $("m-sub").textContent = src.brand + (src.year ? " · " + src.year : "") +
-        (src.accords.length ? " · " + src.accords.slice(0,3).join(", ") : "");
+      $("m-sub").textContent = src.brand + (src.year ? " \u00b7 " + src.year : "") +
+        (src.accords.length ? " \u00b7 " + src.accords.slice(0,3).join(", ") : "");
       const partners = layerPartners(src, data, 8);
       const list = $("m-list");
       if (!partners.length) {
@@ -428,8 +493,8 @@
             <div class="combo-top">
               <button class="combo-link" data-id="${r.p._id}">
                 <span class="combo-name">${escapeHtml(r.p.name)}</span>
-                <span class="combo-brand">— ${escapeHtml(r.p.brand)}</span>
-                <span class="arrow">›</span>
+                <span class="combo-brand">${escapeHtml(r.p.brand)}</span>
+                <span class="arrow">&rsaquo;</span>
               </button>
               <span class="strength ${cls}">${label}</span>
             </div>
@@ -453,14 +518,14 @@
     const picks = { A: null, B: null };
 
     function slotEmpty(slot) {
-      return `<input class="pick-input" id="inp${slot}" type="text" placeholder="Search a fragrance…" autocomplete="off" />
+      return `<input class="pick-input" id="inp${slot}" type="text" placeholder="Search a fragrance" autocomplete="off" />
         <div class="pick-results" id="res${slot}" hidden></div>`;
     }
     function slotFilled(slot, p) {
       return `<div class="picked">
         <span class="pk-clear" data-slot="${slot}">&times;</span>
         <div><b>${escapeHtml(p.name)}</b></div>
-        <div class="pk-brand">${escapeHtml(p.brand)}${p.year?" · "+p.year:""}</div>
+        <div class="pk-brand">${escapeHtml(p.brand)}${p.year?" \u00b7 "+p.year:""}</div>
       </div>`;
     }
 
@@ -516,7 +581,7 @@
         return;
       }
       if (picks.A._id === picks.B._id) {
-        v.innerHTML = `<div class="verdict-tip">That's the same fragrance on both sides — pick two different ones.</div>`;
+        v.innerHTML = `<div class="verdict-tip">That's the same fragrance on both sides. Pick two different ones.</div>`;
         return;
       }
       // score both directions, take the better signal
@@ -537,7 +602,7 @@
         <div class="why">${whyText(r)}</div>
         <div class="verdict-tip">
           Application tip: spray <b>${escapeHtml(first.name)}</b> first (it's the heavier base),
-          then <b>${escapeHtml(second.name)}</b> on top. Go light on the second — 1–2 sprays — and test on skin before committing.
+          then <b>${escapeHtml(second.name)}</b> on top. Go light on the second, 1 to 2 sprays, and test on skin before committing.
         </div>
       </div>`;
     }
